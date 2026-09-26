@@ -88,18 +88,6 @@ const HTML_CONTENT = `
             touch-action: pan-y;
         }
 
-        body.edit-mode .card,
-        body.edit-mode .card:hover {
-            transform: none !important;
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important; 
-        }
-        
-        html.dark body.edit-mode .card,
-        html.dark body.edit-mode .card:hover {
-            box-shadow: none !important;
-            border-color: rgba(51, 65, 85, 0.5) !important;
-        }
-
         .add-card-placeholder {
             pointer-events: auto !important;
             z-index: 10;
@@ -862,7 +850,7 @@ const HTML_CONTENT = `
     </div>
 
     <!-- Tooltip Container -->
-    <div id="custom-tooltip" class="fixed hidden pointer-events-none max-w-xs whitespace-pre-wrap border leading-relaxed tracking-wide backdrop-blur-sm rounded-xl shadow-glass px-4 py-2 text-sm transition-opacity duration-150
+    <div id="custom-tooltip" class="fixed hidden pointer-events-none max-w-xs whitespace-pre-wrap border leading-relaxed tracking-wide rounded-xl shadow-glass px-4 py-2 text-sm transition-opacity duration-150
         bg-card dark:bg-card text-base-foreground dark:text-base-foreground border-[color-mix(in_oklab,var(--border)_50%,transparent)] dark:border-[color-mix(in_oklab,var(--border)_50%,transparent)]">
     </div>
 
@@ -1566,7 +1554,7 @@ const HTML_CONTENT = `
             // APP 模式下，手机端一行4个，平板6个，大屏8-10个
             const gridClasses = isAppLayout 
                 ? 'grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-x-2 gap-y-6' 
-                : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4';
+                : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-3 gap-y-2';
             
             cardContainer.className = \`grid \${gridClasses} card-container relative\`;
             cardContainer.id = gridId(category); // 与 section.id 区分，避免同页面 id 重复
@@ -2019,13 +2007,13 @@ const HTML_CONTENT = `
         
         let cardBaseClass = isAppLayout 
             ? 'flex flex-col items-center justify-start py-1 gap-1.5 hover:z-10' 
-            : 'flex flex-col p-4 bg-[color-mix(in_oklab,var(--card)_90%,transparent)] dark:bg-[color-mix(in_oklab,var(--card)_60%,transparent)] backdrop-blur-sm border border-line dark:border-[color-mix(in_oklab,var(--border)_50%,transparent)] hover:border-[color-mix(in_oklab,var(--primary)_50%,transparent)] dark:hover:border-[color-mix(in_oklab,var(--primary)_50%,transparent)] shadow-sm hover:shadow-[0_8px_20px_-6px_rgba(0,0,0,0.1)] dark:shadow-none dark:hover:shadow-[0_8px_20px_-6px_rgba(0,0,0,0.4)] hover:-translate-y-1.5';
+            : 'flex items-center gap-3 px-3 py-2.5 hover:bg-[var(--menu-hover)]';
             
         if (link.isPrivate && !isAppLayout) {
-            cardBaseClass += ' ring-1 ring-amber-400/40 bg-[color-mix(in_oklab,var(--card)_85%,transparent)] dark:bg-amber-900/10 !border-amber-200 dark:!border-amber-700/50';
+            cardBaseClass += ' ring-1 ring-amber-400/40';
         }
 
-        card.className = \`group relative h-full w-full rounded-[var(--radius-2xl)] transition-[transform,box-shadow,border-color] duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] cursor-pointer select-none \${cardBaseClass}\`;
+        card.className = \`group relative h-full w-full rounded-[var(--radius-2xl)] transition-colors duration-150 cursor-pointer select-none \${cardBaseClass}\`;
         
         if (isEditMode) {
             card.setAttribute('draggable', 'true');
@@ -2039,12 +2027,18 @@ const HTML_CONTENT = `
         const header = document.createElement('div');
         header.className = isAppLayout 
             ? 'flex flex-col items-center justify-center w-full relative' 
-            : 'flex items-center gap-3 mb-2.5 w-full';
+            : 'flex items-center gap-3 flex-1 min-w-0';
         
+        // 图标右侧的文字列：列表布局放名称+描述两行，APP 布局只有名称一行
+        const textCol = document.createElement('div');
+        textCol.className = isAppLayout
+            ? 'flex flex-col items-center w-full'
+            : 'flex flex-col min-w-0 flex-1';
+
         const iconWrap = document.createElement('div');
         const iconWrapClass = isAppLayout
             ? 'relative w-14 h-14 sm:w-16 sm:h-16'
-            : 'relative w-9 h-9';
+            : 'relative w-9 h-9 flex-shrink-0';
         iconWrap.className = iconWrapClass;
 
         const spinner = document.createElement('span');
@@ -2068,7 +2062,7 @@ const HTML_CONTENT = `
              }
         } else {
              // 列表风格：小图标、淡底
-             iconClass += ' rounded-lg object-contain bg-muted dark:bg-muted p-1 border border-line dark:border-line transition-transform group-hover:scale-105 pointer-events-none';
+             iconClass += ' rounded-lg object-contain bg-muted dark:bg-muted p-1 border border-line dark:border-line pointer-events-none';
         }
         icon.className = iconClass;
 
@@ -2104,28 +2098,29 @@ const HTML_CONTENT = `
         const title = document.createElement('div');
         const titleAlign = isAppLayout 
             ? 'text-center text-xs sm:text-sm font-medium mt-1 w-[120%] truncate px-1 text-base-foreground dark:text-base-foreground drop-shadow-sm' 
-            : 'font-semibold text-sm flex-1 truncate text-base-foreground group-hover:text-accent dark:group-hover:text-accent transition-colors pointer-events-none';
+            : 'font-semibold text-sm truncate text-base-foreground';
         
         title.className = \`card-title pointer-events-none \${titleAlign}\`;
         title.textContent = link.name;
-        
+
         header.appendChild(iconWrap);
-        header.appendChild(title);
+        header.appendChild(textCol);
+        textCol.appendChild(title);
+
+        if (!isAppLayout) {
+            const desc = document.createElement('div');
+            desc.className = 'text-xs text-muted-foreground truncate card-tip leading-relaxed pointer-events-none';
+            desc.textContent = link.tips || '';
+            textCol.appendChild(desc);
+        }
 
         const statusTag = document.createElement('span');
-        statusTag.className = 'card-status-tag';
+        statusTag.className = 'card-status-tag flex-shrink-0';
         statusTag.setAttribute('data-for', link.url);
         statusTag.textContent = '';
         header.appendChild(statusTag);
 
         card.appendChild(header);
-
-        if (!isAppLayout) {
-            const desc = document.createElement('div');
-            desc.className = 'text-xs text-muted-foreground line-clamp-2 min-h-[1.25rem] card-tip leading-relaxed pointer-events-none w-full';
-            desc.textContent = link.tips || '';
-            card.appendChild(desc);
-        }
 
         if (link.isPrivate && !isAppLayout) {
             const badge = document.createElement('div');
@@ -2150,9 +2145,9 @@ const HTML_CONTENT = `
             const menuBtn = document.createElement('button');
             const btnStyle = isAppLayout
                 ? 'w-6 h-6 rounded-full bg-secondary dark:bg-muted text-muted-foreground shadow-sm hover:bg-accent dark:hover:bg-accent hover:text-accent-foreground'
-                : 'w-7 h-7 rounded-lg text-muted-foreground hover:text-muted-foreground dark:hover:text-base-foreground hover:bg-[color-mix(in_oklab,var(--muted)_80%,transparent)] dark:hover:bg-[color-mix(in_oklab,var(--muted)_60%,transparent)] backdrop-blur-sm';
+                : 'w-7 h-7 rounded-lg text-muted-foreground hover:text-muted-foreground dark:hover:text-base-foreground hover:bg-[var(--menu-hover)]';
             
-            menuBtn.className = \`\${btnStyle} flex items-center justify-center transition-all duration-200\`;
+            menuBtn.className = \`\${btnStyle} flex items-center justify-center transition-colors duration-200\`;
             menuBtn.innerHTML = '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>';
             
             const dropdown = document.createElement('div');
